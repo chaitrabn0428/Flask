@@ -3,51 +3,51 @@ import requests
 
 API_URL = "http://127.0.0.1:5000/books"
 
-st.title("📚 Book Management App")
+st.title("My Books Library")
 
-# 📌 Fetch Books
+# to fetch books
 def fetch_books():
     response = requests.get(API_URL)
     return response.json() if response.status_code == 200 else []
 
-# 📌 Get Book by Title
+# to get book by title
 def get_book_by_title(title):
     response = requests.get(f"{API_URL}/title/{title}")
     return response.json() if response.status_code == 200 else {"error": "Book not found"}
 
-# 📌 Get Book by ID
+# to get book by ID
 def get_book_by_id(book_id):
     response = requests.get(f"{API_URL}/{book_id}")
     return response.json() if response.status_code == 200 else {"error": "Book not found"}
 
-# 📌 Add Book
-def add_book(title, author, year):
-    response = requests.post(API_URL, json={"title": title, "author": author, "year": year})
+#to add a new book
+def add_book(title, author, rating, fav_line):
+    response = requests.post(API_URL, json={"title": title, "author": author, "rating": rating, "fav_line": fav_line})
     return response.json()
 
-# 📌 Update Book
-def update_book(book_id, title, author, year):
-    response = requests.put(f"{API_URL}/{book_id}", json={"title": title, "author": author, "year": year})
+#to update a existing book
+def update_book(book_id, title, author, rating):
+    response = requests.put(f"{API_URL}/{book_id}", json={"title": title, "author": author, "rating": rating})
     return response.json()
 
-# 📌 Delete Book
+# to delete a book
 def delete_book(book_id):
     response = requests.delete(f"{API_URL}/{book_id}")
     return response.json()
 
-# 📌 Streamlit UI
+# Streamlit Application
 option = st.selectbox("Select an option", 
-                      ["List Books", "View Book Info by Title", "Add Book", "Update Book", "Delete Book"])
+                      ["List all books", "Search a book", "Add a new book", "Update book details", "Delete a book"])
 
-if option == "List Books":
+if option == "List all books":
     books = fetch_books()
     if books:
         for book in books:
-            st.write(f"📖 **{book['title']}** by {book['author']} (Year: {book['year']}) - ID: {book['id']}")
+            st.write(f"📖 **{book['title']}** by {book['author']} (rating: {book['rating']})")
     else:
         st.warning("No books available.")
 
-elif option == "View Book Info by Title":
+elif option == "Search a book":
     title = st.text_input("Enter Book Title")
     if st.button("Check Book Info"):
         result = get_book_by_title(title)
@@ -56,29 +56,30 @@ elif option == "View Book Info by Title":
         else:
             st.write(f"📖 **Title:** {result['title']}")
             st.write(f"✍ **Author:** {result['author']}")
-            st.write(f"📅 **Year:** {result['year']}")
+            st.write(f"📅 **rating:** {result['rating']}")
 
-elif option == "Add Book":
+elif option == "Add a new book":
     title = st.text_input("Enter Book Title")
     author = st.text_input("Enter Author")
-    year = st.number_input("Enter Year", min_value=1000, max_value=9999, step=1)
+    rating = st.number_input("Add Your Ratings", min_value=0, max_value=5, step=1)
+    fav_line = st.text_input("Add Your Favourite Line")
     if st.button("Add Book"):
-        response = add_book(title, author, year)
+        response = add_book(title, author, rating, fav_line)
         st.success(response["message"])
 
-elif option == "Update Book":
+elif option == "Update book details":
     book_id = st.number_input("Enter Book ID", min_value=1, step=1)
     title = st.text_input("Enter New Title")
     author = st.text_input("Enter New Author")
-    year = st.number_input("Enter New Year", min_value=1000, max_value=9999, step=1)
+    rating = st.number_input("Enter New rating", min_value=1000, max_value=9999, step=1)
     if st.button("Update Book"):
-        response = update_book(book_id, title, author, year)
+        response = update_book(book_id, title, author, rating)
         if "error" in response:
             st.error(response["error"])
         else:
             st.success(response["message"])
 
-elif option == "Delete Book":
+elif option == "Delete a book":
     book_id = st.number_input("Enter Book ID to Delete", min_value=1, step=1)
     if st.button("Delete Book"):
         response = delete_book(book_id)
